@@ -26,17 +26,19 @@
 
 _size=
 _unit=K
+_case_sensitive=
 
 usage() {
-  echo """Usage: $0 -s <size> -G -M -K 
+  echo """Usage: $0 -s <size> -G -M -K -c
   -s size of ramdisk  
   -G - in gigabytes 
   -M - in megabytes
   -K - in kilobytes (default)
+  -c - make a case sensitive HFS+ volume
 """ >&2
 }
 
-_options=":s:GMKh"
+_options=":s:GMKch"
 
 while getopts $_options _option; do
   case $_option in 
@@ -51,6 +53,9 @@ while getopts $_options _option; do
       ;;
     K )
       _unit=K
+      ;;
+    c )
+      _case_sensitive=" -s "
       ;;
     h )
       usage
@@ -93,7 +98,7 @@ esac
 
 #echo $_sectors
 _ramdev=$(hdiutil attach -nomount ram://$_sectors)
-newfs_hfs -v "RAM-$_size$_unit" $_ramdev 
+newfs_hfs $_case_sensitive -v "RAM-$_size$_unit" $_ramdev 
 
 if [ ! -e "/tmp/${_ramdev##*/}" ]; then
   mkdir /tmp/${_ramdev##*/}
